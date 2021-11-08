@@ -121,7 +121,7 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
 
             # 横盘 =============
             ll = []
-            status = True
+            hpStatus = True
             # if n >= 4:
             #     # 取值5个数 (和下方取5个数同，但是下方有具体取值，故需要单列)
             #     i = 4
@@ -141,16 +141,16 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
                 avg = round(sum(ll) / (len(ll)), 3)
                 # 校验第一天和第五天的差值小于2%
                 if abs((float(close5)/float(close1))-1) > 0.02:
-                    status = False
+                    hpStatus = False
                 if abs(close2 / ((close1 + close5)/2)-1) > 0.08 and abs(close3 / ((close1 + close5)/2)-1) > 0.08 and abs(close4 / ((close1 + close5)/2)-1) > 0.08:
-                    status = False
+                    hpStatus = False
                 for index, item in enumerate(ll):
                     # 校验每天的价格与均价的百分比
                     if (abs((item/avg)-1)) > 0.02:
-                        status = False
+                        hpStatus = False
                         break
                 
-                if status:
+                if hpStatus:
                     # 满足条件的横盘
                     if avg > avgHpMax:
                         avgHpMax = avg
