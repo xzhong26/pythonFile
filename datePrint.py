@@ -77,43 +77,36 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
                     preMin = 0
 
             # 整理================
-            highs = []
-            lows = []
             closes = []
             opens = []
-            # if n < len(tsk):
-            if n > 1:
-                close = float(tsk[n][5])
-                close1 = float(tsk[n - 1][5])
+            if n >= 5:
+                day = 4 #默认取阳柱后4天
                 if count >= 5:
-                    day =  -count
-                else:
-                    day = -4
+                    day =  count
+                close = float(tsk[n - day][5]) # 假设阳柱标准
+                close1 = float(tsk[n - day - 1][5]) #阳柱的前一天
 
                 # 校验收盘价 上一天收盘和当天收盘 差值大于4%
                 if abs((float(close) - float(close1)) / float(close)) > 0.04:
-                    high0 = float(tsk[n][3]) # 阳柱当天的最高
-                    low0 = float(tsk[n][4]) # 阳柱当天的最低
-                    i = 1
-                    while i > day:
-                        i -= 1
-                        if n - i < len(tsk):
-                            close = float(tsk[n - i][5])
-                            closes.append(close)
-                            open = float(tsk[n - i][2])
-                            opens.append(open)
+                    high0 = float(tsk[n - day][3]) # 阳柱当天的最高
+                    low0 = float(tsk[n - day][4]) # 阳柱当天的最低
+                    i = 0 #（0，1，2，3）
+                    while i < day:
+                        close = float(tsk[n - i][5])
+                        closes.append(close)
+                        open = float(tsk[n - i][2])
+                        opens.append(open)
+                        i += 1
                     status = False
                     if max(closes) < high0:
                         if low0 < min(opens):
                             if min(closes) > low0:
                                 status = True
-                        else:
-                            count = 0
-                    if status:           
-                        if count < 5:
-                            count = 5
-                        else:
+                    if status:
+                        if count >= 5:
                             count += 1
+                        else:           
+                            count = 5
                     else:
                         count = 0
                 else:
@@ -121,7 +114,7 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
 
             # 横盘 =============
             ll = []
-            hpStatus = True
+            hpStatus = False
             # if n >= 4:
             #     # 取值5个数 (和下方取5个数同，但是下方有具体取值，故需要单列)
             #     i = 4
@@ -139,16 +132,17 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
                 ll.extend([close1, close2, close3, close4, close5])
 
                 avg = round(sum(ll) / (len(ll)), 3)
-                # 校验第一天和第五天的差值小于2%
-                if abs((float(close5)/float(close1))-1) > 0.02:
-                    hpStatus = False
-                if abs(close2 / ((close1 + close5)/2)-1) > 0.08 and abs(close3 / ((close1 + close5)/2)-1) > 0.08 and abs(close4 / ((close1 + close5)/2)-1) > 0.08:
-                    hpStatus = False
-                for index, item in enumerate(ll):
-                    # 校验每天的价格与均价的百分比
-                    if (abs((item/avg)-1)) > 0.02:
-                        hpStatus = False
-                        break
+                # 校验第一天和第五天的差值小于2% 和 第2，3，4每日价格除以 1+5的平均价小于8%
+                if abs((float(close5)/float(close1))-1) < 0.02 and abs(close2 / ((close1 + close5)/2)-1) < 0.08 and abs(close3 / ((close1 + close5)/2)-1) < 0.08 and abs(close4 / ((close1 + close5)/2)-1) < 0.08:
+                    hpStatus = True
+                else:
+                    for index, item in enumerate(ll):
+                        # 校验每天的价格与均价的百分比
+                        if (abs((item/avg)-1)) < 0.02:
+                            hpStatus = True
+                        else:
+                            hpStatus = False
+                            break
                 
                 if hpStatus:
                     # 满足条件的横盘

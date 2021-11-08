@@ -30,7 +30,7 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
     # print("---------------------++++++++++++++++---------------------")
     for n, row in enumerate(tsk):
         ll = []
-        status = True
+        status = False
         if n >= 4:
             
             close1 = float(tsk[n][5])
@@ -41,20 +41,22 @@ with open('源数据20200701-20211028 - 副本.csv', mode='r') as f:
 
             ll.extend([close1, close2, close3, close4, close5])
             avg = round(sum(ll) / (len(ll)), 3)
-            # print("=====", close1, close2, close3, close4, close5, abs((float(close5)/float(close1))-1), "==+++++==",abs(close2 / ((close1 + close5)/2)-1), abs(close3 / ((close1 + close5)/2)-1), abs(close4 / ((close1 + close5)/2)-1), avg )
+            print("=====", close1, close2, close3, close4, close5, abs((float(close5)/float(close1))-1), "==+++++==",abs(close2 / ((close1 + close5)/2)-1), abs(close3 / ((close1 + close5)/2)-1), abs(close4 / ((close1 + close5)/2)-1), avg )
 
             
-            # 校验第一天和第五天的差值小于2%
-            if abs((float(close5)/float(close1))-1) > 0.02:
-                status = False
-            if abs(close2 / ((close1 + close5)/2)-1) > 0.08 and abs(close3 / ((close1 + close5)/2)-1) > 0.08 and abs(close4 / ((close1 + close5)/2)-1) > 0.08:
-                status = False
-            for index, item in enumerate(ll):
-                # 校验每天的价格与均价的百分比
-                print("check",abs((item/avg)-1), item)
-                if (abs((item/avg)-1)) > 0.02:
-                    status = False
-                    break
+            # 校验第一天和第五天的差值小于2% 和 第2，3，4每日价格除以 1+5的平均价小于8%
+            if abs((float(close5)/float(close1))-1) < 0.02 and abs(close2 / ((close1 + close5)/2)-1) < 0.08 and abs(close3 / ((close1 + close5)/2)-1) < 0.08 and abs(close4 / ((close1 + close5)/2)-1) < 0.08:
+                status = True
+                print("1111111", status)
+            else:
+                for index, item in enumerate(ll):
+                    # 校验每天的价格与均价的百分比
+                    if (abs((item/avg)-1)) < 0.02:
+                        status = True
+                    else:
+                        status = False
+                        break
+                print("222222", status)
             
             if status:
                 # 满足条件的横盘
